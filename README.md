@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sales Career Tracker (working name)
 
-## Getting Started
+A career-performance tracker for SaaS Account Executives. Log quota and deal
+metrics each quarter, keep an achievement library, and turn it into a
+sales-specific CV (PDF) and a private-by-default shareable portfolio.
 
-First, run the development server:
+See [`SPEC.md`](SPEC.md) for the product spec and [`CLAUDE.md`](CLAUDE.md)
+for working on the code with Claude Code.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Next.js 16 · TypeScript · Tailwind v4 · Supabase (auth, Postgres, RLS) ·
+`@react-pdf/renderer` · Claude API (CV import and optional wording polish).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Create a Supabase project** at supabase.com.
+2. **Run the migration**: open the SQL editor and run
+   `supabase/migrations/0001_init.sql` (or `supabase db push` with the CLI).
+3. **Configure auth** (Authentication → URL Configuration):
+   - Site URL: `http://localhost:3000` (your Vercel URL in production)
+   - Redirect URLs: `http://localhost:3000/auth/callback`
+   - Optional: enable the Google provider under Authentication → Providers.
+4. **Environment**: `cp .env.example .env.local` and fill in the Supabase URL
+   and anon key. Add `ANTHROPIC_API_KEY` to enable CV import; without it,
+   onboarding falls back to manual entry.
+5. **Run it**:
+   ```sh
+   npm install
+   npm run dev
+   ```
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+| command | what it does |
+|---|---|
+| `npm run dev` | dev server on :3000 |
+| `npm run build` | production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript |
+| `npm run test:db` | runs the migration in an in-memory Postgres and checks RLS and portfolio privacy |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deploy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Push to GitHub, import the repo in Vercel, set the same env vars
+(`NEXT_PUBLIC_SITE_URL` = your production URL), and add
+`https://your-domain/auth/callback` to Supabase redirect URLs.
 
-## Deploy on Vercel
+## What's in milestone 1
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Magic-link and Google sign-in
+- Onboarding: specialization (AE), basics, CV import with review, first record
+- Tracker: positions, yearly/quarterly performance, achievements
+- CV builder: target role, emphasis, include toggles, inline editing, AI
+  polish with a no-new-numbers guardrail, PDF export
+- Portfolio: custom slug, section toggles, % vs € visibility, publish /
+  unpublish, public page at `/p/{slug}`
